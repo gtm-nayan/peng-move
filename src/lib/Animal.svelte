@@ -4,22 +4,24 @@
 	export let items: string[];
 	export let name: string;
 
-	let el: HTMLImageElement[] = [];
+	let el: HTMLImageElement[] = Array.from({
+		length: items.length
+	});
 	let ww: number = 0;
 	let wh: number = 0;
 
 	interface Active {
 		index: number;
-		left: string;
-		top: string;
+		left: number;
+		top: number;
 		origin: string;
 	}
 
 	let overlay = false;
 	let active_el: Active = {
 		index: -1,
-		left: '0',
-		top: '0',
+		left: 0,
+		top: 0,
 		origin: '0 0'
 	};
 
@@ -45,8 +47,8 @@
 		];
 
 		active_el.index = i;
-		active_el.left = `${left - left_offset}px`;
-		active_el.top = `${top - top_offset}px`;
+		active_el.left = left - left_offset;
+		active_el.top = top - top_offset;
 		active_el.origin = `${pos[0]}% ${pos[1]}%`;
 
 		overlay = !overlay;
@@ -63,8 +65,8 @@
 
 			active_el = {
 				index: -1,
-				left: '0',
-				top: '0',
+				left: 0,
+				top: 0,
 				origin: '0 0'
 			};
 			overlay = false;
@@ -92,27 +94,28 @@
 				alt=""
 				on:click={() => handle_click(i)}
 				bind:this={el[i]}
-				style:position={active_el.index === i
-					? 'fixed'
-					: 'static'}
-				style:left={active_el.index === i ? active_el.left : 0}
-				style:top={active_el.index === i ? active_el.top : 0}
-				style:transform-origin={active_el.index === i
-					? active_el.origin
-					: 0}
-				style:transform="scale({active_el.index === i
-					? $scale
-					: 1})"
-				style:pointer-events={active_el.index === i && overlay
-					? 'none'
-					: 'auto'}
-				style:z-index={active_el.index === i ? '12' : '1'}
+				class:active={active_el.index === i}
+				style:--tx={active_el.left}
+				style:--ty={active_el.top}
+				style:--origin={active_el.origin}
+				style:--scale={$scale}
+				style:pointer-events={overlay ? 'none' : null}
 			/>
 		</div>
 	{/each}
 </div>
 
 <style>
+	.active {
+		position: fixed;
+		top: calc(var(--ty) * 1px);
+		left: calc(var(--tx) * 1px);
+		transform-origin: var(--origin);
+		transform: scale(var(--scale));
+		z-index: 12;
+		pointer-events: var(--pe, auto);
+	}
+
 	.container {
 		scroll-snap-type: x mandatory;
 		overflow-x: scroll;
