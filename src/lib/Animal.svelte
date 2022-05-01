@@ -1,12 +1,11 @@
 <script lang="ts">
+	import { null_to_empty } from 'svelte/internal';
 	import { spring } from 'svelte/motion';
 
 	export let items: string[];
 	export let name: string;
 
-	let el: HTMLImageElement[] = Array.from({
-		length: items.length
-	});
+	let el: (HTMLImageElement | null)[] = items.map((_) => null);
 	let ww: number = 0;
 	let wh: number = 0;
 
@@ -29,9 +28,10 @@
 	let opacity = spring(0, { stiffness: 0.2, damping: 1 });
 
 	function handle_click(i: number) {
-		if (el[i] === null) return;
+		const this_el = el[i];
+		if (!this_el) return;
 
-		const styles = window.getComputedStyle(el[i]);
+		const styles = window.getComputedStyle(this_el);
 		const top_offset = parseInt(
 			styles.getPropertyValue('margin-top')
 		);
@@ -40,7 +40,7 @@
 		);
 
 		const { left, right, top, bottom, width } =
-			el[i].getBoundingClientRect();
+			this_el.getBoundingClientRect();
 		let pos = [
 			left < ww - right ? 0 : 100,
 			top < wh - bottom ? 0 : 100
@@ -99,7 +99,7 @@
 				style:--ty={active_el.top}
 				style:--origin={active_el.origin}
 				style:--scale={$scale}
-				style:pointer-events={overlay ? 'none' : null}
+				style:pointer-events={overlay ? 'none' : 'auto'}
 			/>
 		</div>
 	{/each}
